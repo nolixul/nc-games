@@ -6,7 +6,8 @@ const {
   formatCategories,
   formatUsers,
   formatReviews,
-  formatComments
+  formatComments,
+  createReviewRef
 } = require('../utils/data-manipulation');
 
 const seed = async (data) => {
@@ -25,11 +26,13 @@ const seed = async (data) => {
       description VARCHAR(1000)
       );`
   );
+
   await db.query(`CREATE TABLE users (
     username VARCHAR(200) NOT NULL PRIMARY KEY, 
     avatar_url VARCHAR(500) NOT NULL, 
     name VARCHAR(200) NOT NULL
   );`);
+
   await db.query(`CREATE TABLE reviews (
     review_id SERIAL PRIMARY KEY, 
     title VARCHAR(300) NOT NULL, 
@@ -41,13 +44,14 @@ const seed = async (data) => {
     owner VARCHAR REFERENCES users (username),
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
   );`);
+
   await db.query(`CREATE TABLE comments (
     comment_id SERIAL PRIMARY KEY, 
     author VARCHAR NOT NULL REFERENCES users, 
     review_id INT REFERENCES reviews, 
     votes INT NOT NULL DEFAULT 0, 
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-  );`);
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(), 
+    body VARCHAR(5000) NOT NULL);`);
 
   const categoryValues = formatCategories(categoryData);
   const categoryQueryStr = format(
@@ -76,22 +80,21 @@ const seed = async (data) => {
     created_at) VALUES %L RETURNING *;`,
     reviewValues
   );
-  await db.query(reviewsQueryStr);
+  const reviewsinserted = await db.query(reviewsQueryStr);
 
-  const commentValues = formatComments(commentData);
+  const reviewRef = createReviewRef(reviewsinserted.rows);
+  const commentValues = formatComments(commentData, reviewRef);
   const commentsQueryStr = format(
     `INSERT INTO comments (
-    author VARCHAR REFERENCES users (username),
-    review_id REFERENCES reviews (review_id),
-    votes INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    author,
+    review_id,
+    votes,
+    created_at, 
+    body
     ) VALUES %L RETURNING *;`,
     commentValues
   );
-  const commentsResult = await db.query(commentsQueryStr);
-  console.log(commentsResult);
-
-  //ASSIGN YOUR RETURNING * AWAIT TO A VARIABLE AND CONSOLE.LOG IT TO SEE SOME FEEDBACK!!
+  await db.query(commentsQueryStr);
 };
 
 module.exports = seed;

@@ -2,7 +2,8 @@ const {
   formatCategories,
   formatUsers,
   formatReviews,
-  createCategoryRef
+  formatComments,
+  createReviewRef
 } = require('../db/utils/data-manipulation');
 
 describe('formatCategories', () => {
@@ -87,7 +88,7 @@ describe('formatUsers', () => {
 
 // NEED TO WRITE REF DICTIONARIES FOR COMMENTS TABLES AND TEST THEM. ALSO NEED TO SET DEFAULT IMAGE URL TO DEFAULT IN CREATE TABLE
 
-describe.only('formatReviews', () => {
+describe('formatReviews', () => {
   it('returns an empty array for no categories', () => {
     expect(formatReviews([])).toEqual([]);
   });
@@ -148,10 +149,170 @@ describe.only('formatReviews', () => {
       }
     ];
     expect(input).toEqual(unmutatedInput);
-    //TEST FOR MULTIPLE INSTANCES
-    //TEST FOR REFERENCE
-    //CAN TEST FOR THE OBJECT REFERENCES INSIDE THE ARRAYS - WHEN MANIPULATING THE DATA
   });
 });
 
-//describe('reviewRef (review_id)');
+describe('createReviewRef', () => {
+  it('returns an object when passed an array', () => {
+    expect(typeof createReviewRef([])).toEqual('object');
+    expect(createReviewRef([])).toEqual({});
+  });
+  it('returns an object with a review title as a key and review id as value when passed single instance', () => {
+    const reviewInput = [
+      {
+        review_id: 24,
+        title: 'Escape The Dark Sector',
+        review_body: 'a',
+        designer: 'Alex Crispin,',
+        review_img_url: 'b',
+        votes: 11,
+        category: 'push-your-luck',
+        owner: 'jessjelly',
+        created_at: '2021-01-18T10:09:05.610Z'
+      }
+    ];
+    const actual = createReviewRef(reviewInput);
+    expect(actual).toEqual({ 'Escape The Dark Sector': 24 });
+  });
+  it("returns an object with passed in reviews' title as key and id as value, when passed multiple instances", () => {
+    const input = [
+      {
+        review_id: 23,
+        title: 'Escape The Dark Castle',
+        review_body: 'd',
+        designer: 'Alex Crispin,',
+        review_img_url: 'c',
+        votes: 18,
+        category: 'push-your-luck',
+        owner: 'jessjelly',
+        created_at: '2021-01-18T10:09:05.410Z'
+      },
+      {
+        review_id: 24,
+        title: 'Escape The Dark Sector',
+        review_body: 'b',
+        designer: 'Alex Crispin,',
+        review_img_url: 'a',
+        votes: 11,
+        category: 'push-your-luck',
+        owner: 'jessjelly',
+        created_at: '2021-01-18T10:09:05.610Z'
+      }
+    ];
+    const actual = createReviewRef(input);
+    const expected = {
+      'Escape The Dark Sector': 24,
+      'Escape The Dark Castle': 23
+    };
+    expect(actual).toEqual(expected);
+  });
+  it("doesn't mutate input data", () => {
+    const input = [
+      {
+        review_id: 24,
+        title: 'Escape The Dark Sector',
+        review_body: 'a',
+        designer: 'Alex Crispin,',
+        review_img_url: 'b',
+        votes: 11,
+        category: 'push-your-luck',
+        owner: 'jessjelly',
+        created_at: '2021-01-18T10:09:05.610Z'
+      }
+    ];
+    const actual = createReviewRef(input);
+    const unmutatedInput = [
+      {
+        review_id: 24,
+        title: 'Escape The Dark Sector',
+        review_body: 'a',
+        designer: 'Alex Crispin,',
+        review_img_url: 'b',
+        votes: 11,
+        category: 'push-your-luck',
+        owner: 'jessjelly',
+        created_at: '2021-01-18T10:09:05.610Z'
+      }
+    ];
+    expect(input).toEqual(unmutatedInput);
+  });
+});
+
+describe('formatComments', () => {
+  it('returns an empty array for no comments', () => {
+    expect(formatComments([])).toEqual([]);
+  });
+  it('each comment is replaced with author, review_id, votes, created_at, body', () => {
+    const input = [
+      {
+        body: 'I loved this game too!',
+        belongs_to: 'JengARRGGGH!',
+        created_by: 'bainesface',
+        votes: 16,
+        created_at: new Date(1511354613389)
+      },
+      {
+        body: 'My dog loved this game too!',
+        belongs_to: 'Culture a Love of Agriculture With Agricola',
+        created_by: 'mallionaire',
+        votes: 13,
+        created_at: new Date(1610964545410)
+      }
+    ];
+    const reviewRef = {
+      'Culture a Love of Agriculture With Agricola': 1,
+      'JengARRGGGH!': 2
+    };
+    const actual = formatComments(input, reviewRef);
+    expect(actual).toEqual([
+      ['bainesface', 2, 16, new Date(1511354613389), 'I loved this game too!'],
+      [
+        'mallionaire',
+        1,
+        13,
+        new Date(1610964545410),
+        'My dog loved this game too!'
+      ]
+    ]);
+  });
+  it('input comments are not mutated', () => {
+    const input = [
+      {
+        body: 'I loved this game too!',
+        belongs_to: 'JengARRGGGH!',
+        created_by: 'bainesface',
+        votes: 16,
+        created_at: new Date(1511354613389)
+      },
+      {
+        body: 'My dog loved this game too!',
+        belongs_to: 'Culture a Love of Agriculture With Agricola',
+        created_by: 'mallionaire',
+        votes: 13,
+        created_at: new Date(1610964545410)
+      }
+    ];
+    const reviewRef = {
+      'Culture a Love of Agriculture With Agricola': 1,
+      'JengARRGGGH!': 2
+    };
+    formatComments(input, reviewRef);
+    const unmutatedInput = [
+      {
+        body: 'I loved this game too!',
+        belongs_to: 'JengARRGGGH!',
+        created_by: 'bainesface',
+        votes: 16,
+        created_at: new Date(1511354613389)
+      },
+      {
+        body: 'My dog loved this game too!',
+        belongs_to: 'Culture a Love of Agriculture With Agricola',
+        created_by: 'mallionaire',
+        votes: 13,
+        created_at: new Date(1610964545410)
+      }
+    ];
+    expect(input).toEqual(unmutatedInput);
+  });
+});

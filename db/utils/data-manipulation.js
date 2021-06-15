@@ -1,7 +1,3 @@
-exports.createCategoryRef = (categoryData) => {};
-
-exports.createUserRef = () => {};
-
 exports.formatCategories = (categoryData) => {
   return categoryData.map(({ slug, description }) => {
     return [slug, description];
@@ -40,8 +36,27 @@ exports.formatReviews = (reviewData) => {
   );
 };
 
-exports.formatComments = (commentData) => {
-  return commentData.map(({}) => {
-    return [];
+exports.createReviewRef = (reviewRows) => {
+  const reviewRef = {};
+  reviewRows.forEach((review) => {
+    reviewRef[review.title] = review.review_id;
   });
+  return reviewRef;
+};
+
+exports.formatComments = (commentData, reviewRef) => {
+  return commentData.map(
+    ({
+      created_by,
+      votes = 0,
+      created_at,
+      belongs_to,
+      body = 'no comment'
+    }) => {
+      const author = created_by;
+      const review_id = reviewRef[belongs_to];
+      const toReturn = [author, review_id, votes, created_at, body];
+      return toReturn;
+    }
+  );
 };
