@@ -6,4 +6,6 @@ const reviewsRouter = require('./reviews.router');
 
 // const { apiControllers } = require('../controllers/');
 
+apiRouter.use('/categories', categoriesRouter);
+
 module.exports = apiRouter;
