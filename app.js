@@ -14,7 +14,7 @@ app.use(express.json());
 
 app.use('/api', apiRouter);
 
-app.all('/*', send404);
+app.use(send404);
 
 app.use(handleCustomErrors);
 app.use(handlePSQLErrors);
