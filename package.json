@@ -1,4 +1,6 @@
-{
+{"jest": {
+  "setupFilesAfterEnv": ["jest-sorted"]
+},
   "name": "be-nc-games",
   "version": "1.0.0",
   "description": "bc-nc-games",
@@ -23,6 +25,7 @@
   "devDependencies": {
     "dotenv": "^10.0.0",
     "jest": "^27.0.4",
+    "jest-sorted": "^1.0.12",
     "nodemon": "^2.0.7",
     "supertest": "^6.1.3"
   },

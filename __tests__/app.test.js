@@ -40,15 +40,60 @@ describe('/api/categories', () => {
 
 describe('/api/reviews', () => {
   describe('GET /api/reviews', () => {
-    // it("200: returns an array of review objects", async () => {
-    //   const {body} = request(app).get("/api/reviews").expect(200)
-    //   body.message.forEach(review => {
-    //     expect.objectContaining({
-    //       owner: expect.any(String),
-    //       title: expect.any(String),
-    //       review_id: expect.any(Number)        })
-    //   })
-    // })
+    it('200: returns an array of review objects', async () => {
+      const { body } = await request(app).get('/api/reviews').expect(200);
+      body.reviews.forEach((review) => {
+        expect.objectContaining({
+          owner: expect.any(String),
+          title: expect.any(String),
+          review_id: expect.any(Number),
+          category: expect.any(String),
+          review_img_url: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          comment_count: expect.any(String)
+        });
+        expect(body.reviews).toHaveLength(13);
+      });
+    });
+    it('200: default sort_by is by date column', async () => {
+      const { body } = await request(app).get('/api/reviews').expect(200);
+      const reviews = body.reviews;
+      expect(reviews[0].review_id).toBe(7);
+      expect(reviews[reviews.length - 1].review_id).toBe(13);
+      expect(reviews).toBeSortedBy('created_at', {
+        descending: true
+      });
+    });
+    it('200: accepts sort_by query which sorts reviews by any valid column', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews?sort_by=owner')
+        .expect(200);
+      const reviews = body.reviews;
+      expect(reviews).toBeSortedBy('owner', { coerce: true, descending: true });
+    });
+    it('200: default order is descending', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews?sort_by=review_id')
+        .expect(200);
+      const reviews = body.reviews;
+      expect(reviews).toBeSortedBy('review_id', {
+        descending: true
+      });
+    });
+    it('200: accepts order query which can be set to asc or desc', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews?sort_by=review_id&order=asc')
+        .expect(200);
+      const reviews = body.reviews;
+      expect(reviews).toBeSortedBy('review_id');
+    });
+    it('200: accepts category query which filters the reviews by category', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews?category="social deduction"')
+        .expect(200);
+    });
+    //ERRORS? invalid queries?? 400 bad request
   });
   describe('/api/reviews/:review_id', () => {
     describe('GET /api/reviews/:review_id', () => {
