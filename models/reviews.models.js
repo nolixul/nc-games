@@ -46,17 +46,34 @@ exports.selectReviews = async (
     return Promise.reject({ status: 400, msg: 'bad request' });
   }
 
-  if (order !== 'asc' || order !== 'desc') {
-    order = 'desc';
+  if (order !== 'asc' && order !== 'desc') {
+    return Promise.reject({ status: 400, msg: 'bad request' });
   }
 
-  let queryStr = `SELECT * FROM reviews `;
+  let queryValues = [];
+
+  let queryStr = `SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, COUNT(*) AS comment_count 
+  FROM reviews 
+  LEFT JOIN comments 
+  ON reviews.review_id = comments.review_id `;
   if (category) {
-    queryStr += `WHERE category = $1 `;
+    queryStr += `WHERE reviews.category = $1 `;
+    queryValues.push(category);
   }
-  queryStr += `ORDER BY ${sort_by} ${order};`;
+  queryStr += `GROUP BY reviews.review_id ORDER BY ${sort_by} ${order};`;
 
-  console.log(queryStr, 'queryStr');
-  const reviews = await db.query(queryStr, [category]); //ISSUE IS WITH HAVING THIS CATEGORY ON THE END IF IT'S NOT NEEDED
+  const reviews = await db.query(queryStr, queryValues);
+
+  if (reviews.rows.length === 0) {
+    if (category) {
+      const categoryResults = await db.query(
+        `SELECT * FROM categories WHERE categories.slug = $1`,
+        [category]
+      );
+      if (categoryResults.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: 'not found' });
+      }
+    }
+  }
   return reviews.rows;
 };
