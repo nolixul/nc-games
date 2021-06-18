@@ -1,14 +1,9 @@
 const express = require('express');
-const {
-  getReviewById,
-  patchReviewById,
-  getReviews
-} = require('../controllers/reviews.controllers');
-const reviewsRouter = express.Router();
+const { getReviews } = require('../controllers/reviews.controllers');
+const reviewIdRouter = require('./reviewId.router');
+const reviewsRouter = express.Router({ mergeParams: true });
 
-reviewsRouter.get('/:review_id', getReviewById);
-
-reviewsRouter.patch('/:review_id', patchReviewById);
+reviewsRouter.use('/:review_id', reviewIdRouter);
 
 reviewsRouter.get('/', getReviews);
 

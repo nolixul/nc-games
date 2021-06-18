@@ -1,10 +1,6 @@
 \c nc_games_test
 
-SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, COUNT(*) AS comment_count 
-FROM reviews 
-LEFT JOIN comments 
-ON reviews.review_id = comments.review_id 
-WHERE reviews.category = 'social deduction' 
-GROUP BY reviews.review_id 
+SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body FROM comments
+WHERE comments.review_id = 2
 ORDER BY created_at DESC;
 

@@ -19,7 +19,20 @@ describe('/', () => {
 });
 
 describe('/api', () => {
-  describe('GET /api', () => {});
+  describe('GET /api', () => {
+    it('200: responds with JSON describing available endpoints in the api', async () => {
+      const { body } = await request(app).get('/api').expect(200);
+      expect(body.endpoints).toHaveLength(6);
+      endpoints.forEach((endpoint) => {
+        expect(endpoint).toEqual(
+          expect.objectContaining({
+            path: expect.any(String),
+            description: expect.any(String)
+          })
+        );
+      });
+    });
+  });
 });
 
 describe('/api/categories', () => {
@@ -227,6 +240,68 @@ describe('/api/reviews/:review_id', () => {
     });
   });
 });
-// it('GET /api/reviews/:review_id/comments', () => {});
-// it('POST /api/reviews/:review_id/comments', () => {});
-// THESE ARE ESSENTIAL ENDPOINT TEST FRAMEWORKS
+
+describe('/api/reviews/:review_id/comments', () => {
+  describe('GET /api/reviews/:review_id/comments', () => {
+    it('200: responds with an array of comments for the review', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews/2/comments')
+        .expect(200);
+      expect(body.comments).toHaveLength(3);
+      body.comments.forEach((comment) => {
+        expect.objectContaining({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String)
+        });
+        expect(comment.hasOwnProperty('review_id')).toBe(false);
+      });
+    });
+    it('200: responds with empty array if there are no comments for that review', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews/1/comments')
+        .expect(200);
+      expect(body.comments).toEqual([]);
+    });
+    it('404: responds with not found if review_id does not exist', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews/40000/comments')
+        .expect(404);
+      expect(body.msg).toEqual('not found');
+    });
+  });
+  describe('POST /api/reviews/:review_id/comments', () => {
+    it('201: responds with newly created comment', async () => {
+      const { body } = await request(app)
+        .post('/api/reviews/1/comments')
+        .send({
+          username: 'mallionaire',
+          body: 'Best thing invented since sliced bread'
+        })
+        .expect(201);
+      expect(
+        body.comment.hasOwnProperty(
+          'comment_id',
+          'votes',
+          'created_at',
+          'author',
+          'body'
+        )
+      ).toBe(true);
+      expect(body.comment.author).toEqual('mallionaire');
+      expect(body.comment.body).toEqual(
+        'Best thing invented since sliced bread'
+      );
+      expect(body.comment.review_id).toBe(1);
+    });
+    it('400: responds with bad request if object passed in does not have correct keys', async () => {
+      const { body } = await request(app)
+        .post('/api/reviews/1/comments')
+        .send({ not_a_column: 9 })
+        .expect(400);
+      expect(body.msg).toBe('bad request');
+    });
+  });
+});
