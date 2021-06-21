@@ -14,7 +14,7 @@
     "test": "jest",
     "dev": "nodemon ./listen.js",
     "start": "node ./listen.js",
-    "seed-prod": "NODE_ENV=production DATABASE_URL=postgres://uslfjawdjeydam:9c3bbfde062cf2d4fa9e7f21a689b994800d75d50bdc4d3fff278c8da56302ae@ec2-34-193-112-164.compute-1.amazonaws.com:5432/d7g1ktukk9cdjk npm run seed"
+    "seed-prod": "NODE_ENV=production DATABASE_URL=$(heroku config:get DATABASE_URL) npm run seed"
   },
   "repository": {
     "type": "git",
