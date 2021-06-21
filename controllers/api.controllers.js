@@ -1,4 +1,4 @@
-exports.getAPI = async (req, res, next) => {
+exports.getEndpoints = async (req, res, next) => {
   const endpoints = {
     '/api/categories': 'GET',
     '/api/reviews/:review_id': 'GET, PATCH',
