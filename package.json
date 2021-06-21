@@ -13,7 +13,7 @@
     "seed": "node ./db/seeds/run-seed.js",
     "test": "jest",
     "dev": "nodemon ./listen.js",
-    "start": "node index.js"
+    "start": "node ./listen.js"
   },
   "repository": {
     "type": "git",
