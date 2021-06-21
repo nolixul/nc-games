@@ -1,6 +1,10 @@
-{"jest": {
-  "setupFilesAfterEnv": ["jest-sorted"]
-},
+{
+  "start": "node index.js",
+  "jest": {
+    "setupFilesAfterEnv": [
+      "jest-sorted"
+    ]
+  },
   "name": "be-nc-games",
   "version": "1.0.0",
   "description": "bc-nc-games",
