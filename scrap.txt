@@ -1,8 +1,9 @@
 You are now connected to database "nc_games_test" as user "nadia".
- comment_id | votes |       created_at        |   author    |                                   body                                    
-------------+-------+-------------------------+-------------+---------------------------------------------------------------------------
-          5 |    13 | 2021-01-18 10:24:05.41  | mallionaire | Now this is a story all about how, board games turned my life upside down
-          1 |    16 | 2017-11-22 12:43:33.389 | bainesface  | I loved this game too!
-          4 |    16 | 2017-11-22 12:36:03.389 | bainesface  | EPIC board game!
-(3 rows)
+       slug       |                     description                     
+------------------+-----------------------------------------------------
+ euro game        | Abstact games that involve little luck
+ social deduction | Players attempt to uncover each other's hidden role
+ dexterity        | Games involving physical skill
+ children's games | Games suitable for children
+(4 rows)
 

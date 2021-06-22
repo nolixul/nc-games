@@ -68,6 +68,7 @@ describe('/api/reviews', () => {
     it('200: default sort_by is by date column', async () => {
       const { body } = await request(app).get('/api/reviews').expect(200);
       const reviews = body.reviews;
+
       expect(reviews[0].review_id).toBe(7);
       expect(reviews[reviews.length - 1].review_id).toBe(13);
       expect(reviews).toBeSortedBy('created_at', {
@@ -79,6 +80,7 @@ describe('/api/reviews', () => {
         .get('/api/reviews?sort_by=owner')
         .expect(200);
       const reviews = body.reviews;
+
       expect(reviews).toBeSortedBy('owner', { coerce: true, descending: true });
     });
     it('200: default order is descending', async () => {
@@ -86,6 +88,7 @@ describe('/api/reviews', () => {
         .get('/api/reviews?sort_by=review_id')
         .expect(200);
       const reviews = body.reviews;
+
       expect(reviews).toBeSortedBy('review_id', {
         descending: true
       });
@@ -95,33 +98,45 @@ describe('/api/reviews', () => {
         .get('/api/reviews?sort_by=review_id&order=asc')
         .expect(200);
       const reviews = body.reviews;
+
       expect(reviews).toBeSortedBy('review_id');
     });
     it('200: accepts category query which filters the reviews by category', async () => {
       const { body } = await request(app)
         .get('/api/reviews?category=social deduction')
         .expect(200);
+
       expect(body.reviews).toHaveLength(11);
       body.reviews.forEach((review) => {
         expect(review.category).toBe('social deduction');
       });
     });
+    it('200: responds with empty array of reviews if category is valid but has no matching reviews', async () => {
+      const { body } = await request(app)
+        .get("/api/reviews?category=children's games")
+        .expect(200);
+
+      expect(body.reviews.length).toBe(0);
+    });
     it("404: responds with not found if category doesn't exist", async () => {
       const { body } = await request(app)
         .get('/api/reviews?category=not a category')
         .expect(404);
+
       expect(body.msg).toBe('not found');
     });
     it('400: responds with bad request if sort_by is invalid', async () => {
       const { body } = await request(app)
         .get('/api/reviews?sort_by=45')
         .expect(400);
+
       expect(body.msg).toBe('bad request');
     });
     it('400: responds with bad request if order query is not valid', async () => {
       const { body } = await request(app)
         .get('/api/reviews?order=nice_try')
         .expect(400);
+
       expect(body.msg).toBe('bad request');
     });
   });
@@ -147,12 +162,14 @@ describe('/api/reviews/:review_id', () => {
     });
     it('404: responds with error if review_id does not exist', async () => {
       const { body } = await request(app).get('/api/reviews/40000').expect(404);
+
       expect(body.msg).toBe('not found');
     });
     it('400: responds with bad request if review_id is invalid format', async () => {
       const { body } = await request(app)
         .get('/api/reviews/nice_try')
         .expect(400);
+
       expect(body.msg).toBe('bad request');
     });
   });
@@ -215,6 +232,7 @@ describe('/api/reviews/:review_id', () => {
         .patch('/api/reviews/40000')
         .send({ inc_votes: 0 })
         .expect(404);
+
       expect(body.msg).toBe('not found');
     });
     it('400: responds with bad request if review_id is invalid format', async () => {
@@ -222,6 +240,7 @@ describe('/api/reviews/:review_id', () => {
         .patch('/api/reviews/nice_try')
         .send({ inc_votes: 0 })
         .expect(400);
+
       expect(body.msg).toBe('bad request');
     });
     it('400: responds with bad request if update data is invalid', async () => {
@@ -229,6 +248,7 @@ describe('/api/reviews/:review_id', () => {
         .patch('/api/reviews/1')
         .send({ blah: 'notANumber!' })
         .expect(400);
+
       expect(body.msg).toBe('bad request');
     });
   });
@@ -240,6 +260,7 @@ describe('/api/reviews/:review_id/comments', () => {
       const { body } = await request(app)
         .get('/api/reviews/2/comments')
         .expect(200);
+
       expect(body.comments).toHaveLength(3);
       body.comments.forEach((comment) => {
         expect.objectContaining({
@@ -256,13 +277,22 @@ describe('/api/reviews/:review_id/comments', () => {
       const { body } = await request(app)
         .get('/api/reviews/1/comments')
         .expect(200);
+
       expect(body.comments).toEqual([]);
     });
     it('404: responds with not found if review_id does not exist', async () => {
       const { body } = await request(app)
         .get('/api/reviews/40000/comments')
         .expect(404);
-      expect(body.msg).toEqual('not found');
+
+      expect(body.msg).toBe('not found');
+    });
+    it('400: responds with bad request if review_id is invalid', async () => {
+      const { body } = await request(app)
+        .get('/api/reviews/not_an_id/comments')
+        .expect(400);
+
+      expect(body.msg).toBe('bad request');
     });
   });
   describe('POST /api/reviews/:review_id/comments', () => {
@@ -274,6 +304,7 @@ describe('/api/reviews/:review_id/comments', () => {
           body: 'Best thing invented since sliced bread'
         })
         .expect(201);
+
       expect(
         body.comment.hasOwnProperty(
           'comment_id',
@@ -289,11 +320,60 @@ describe('/api/reviews/:review_id/comments', () => {
       );
       expect(body.comment.review_id).toBe(1);
     });
+    it('201: ignores unnecessary properties', async () => {
+      const { body } = await request(app)
+        .post('/api/reviews/1/comments')
+        .send({
+          username: 'mallionaire',
+          body: 'Best thing invented since sliced bread',
+          rating: 10 / 5
+        })
+        .expect(201);
+
+      expect(
+        body.comment.hasOwnProperty(
+          'comment_id',
+          'votes',
+          'created_at',
+          'author',
+          'body'
+        )
+      ).toBe(true);
+      expect(body.comment.hasOwnProperty('rating')).toBe(false);
+      expect(body.comment.author).toEqual('mallionaire');
+      expect(body.comment.body).toEqual(
+        'Best thing invented since sliced bread'
+      );
+      expect(body.comment.review_id).toBe(1);
+    });
     it('400: responds with bad request if object passed in does not have correct keys', async () => {
       const { body } = await request(app)
         .post('/api/reviews/1/comments')
         .send({ not_a_column: 9 })
         .expect(400);
+
+      expect(body.msg).toBe('bad request');
+    });
+    it('404: responds with not found if review_id does not exist', async () => {
+      const { body } = await request(app)
+        .post('/api/reviews/10000/comments')
+        .send({
+          username: 'mallionaire',
+          body: 'Best thing invented since sliced bread'
+        })
+        .expect(404);
+
+      expect(body.msg).toBe('not found');
+    });
+    it('400: responds with bad request if review_id is invalid', async () => {
+      const { body } = await request(app)
+        .post('/api/reviews/not_an_id/comments')
+        .send({
+          username: 'mallionaire',
+          body: 'Best thing invented since sliced bread'
+        })
+        .expect(400);
+
       expect(body.msg).toBe('bad request');
     });
   });

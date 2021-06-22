@@ -5,8 +5,6 @@ const {
   postComment
 } = require('../controllers/comments.controllers');
 
-commentsRouter.get('/', getCommentsByReviewId);
-
-commentsRouter.post('/', postComment);
+commentsRouter.route('/').get(getCommentsByReviewId).post(postComment);
 
 module.exports = commentsRouter;
