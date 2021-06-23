@@ -2,7 +2,7 @@
 
 ## Link to Hosted Version
 
-[Hosted Version](https://nc-games-2021.herokuapp.com/)
+[Hosted Version](https://nc-games-2021.herokuapp.com/api)
 
 ## Project Summary
 
