@@ -16,11 +16,13 @@ As someone brand new to coding, I've run into many speed bumps during this proje
 
 ### Available Endpoints
 
-- `/api` - GET a list of available endpoints and the methods you can use on them
-- `/api/reviews` - GET all the reviews in the database
-- `/api/reviews/:review_id` - GET a specific review by id, PATCH - increase or decrease the votes on a specific review
-- `/api/reviews/:review_id/comments` - GET comments associated with the review_id, POST a new comment on a review specified by review_id
-- `/api/categories` - GET all the categories in the database
+- GET `/api` - gets a list of available endpoints and the methods you can use on them
+- GET `/api/reviews` - gets all the reviews in the database
+- GET `/api/reviews/:review_id` - gets a specific review by review id
+- PATCH `/api/reviews/:review_id` - increase or decreased the votes on a specific review, accepts {inc_votes: number} eg. {inc_votes: 5} would increase votes by 5
+- GET `/api/reviews/:review_id/comments` - gets all comments on a specific review
+- POST `/api/reviews/:review_id/comments` - posts a new comment for a specific review, accepts {username: "example_username", body: "comment body"}
+- GET `/api/categories` - gets all categories from the database
 
 ---
 
@@ -28,10 +30,10 @@ As someone brand new to coding, I've run into many speed bumps during this proje
 
 I would like to implement more functionality in this API in the future, planned future functionality is the following:
 
-- DELETE `/api/comments/:comment_id`
-- GET `/api/users`
-- GET `/api/users/:username`
-- PATCH `/api/comments/:comment_id`
+- DELETE `/api/comments/:comment_id` - delete comments by comment id
+- GET `/api/users` - get all users from the database
+- GET `/api/users/:username` - get a single user by id
+- PATCH `/api/comments/:comment_id` - update a specific comment's votes
 
 ---
 
@@ -47,6 +49,24 @@ Fork the repository on gitHub, click the code button to get a download link. Use
 
 ```
 git clone https://github.com/EXAMPLE-LINK
+```
+
+---
+
+### .env
+
+You will need to set up two `.env` files which will allow you to use a separate test database and a development database. These should be named `.env.development` and `.env.test`. They should have a single line of text inside which sets the postgres database variable to the database you want to use. See `.env.example` file for an example of how it should be set out.
+
+`.env.test`
+
+```
+PGDATABASE=nc_games_test
+```
+
+`.env.development`
+
+```
+PGDATABASE=nc_games
 ```
 
 ---
@@ -67,24 +87,6 @@ A few scripts have been set up to make things easier. To seed the local database
 
 ```
 npm run seed
-```
-
----
-
-### .env
-
-You will need to set up two `.env` files which will allow you to use a separate test database and a development database. These should be named `.env.development` and `.env.test`. They should have a single line of text inside which sets the postgres database variable to the database you want to use. See `.env.example` file for an example of how it should be set out.
-
-`.env.test`
-
-```
-PGDATABASE=nc_games_test
-```
-
-`.env.development`
-
-```
-PGDATABASE=nc_games
 ```
 
 ---
