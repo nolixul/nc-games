@@ -81,9 +81,19 @@ npm i
 
 ---
 
+### Set up local databases
+
+A few scripts have been set up to make things easier. Run `npm run setup-dbs` to set up the local databases for the first time.
+
+```
+npm run setup-dbs
+```
+
+---
+
 ### Seed Local Database
 
-A few scripts have been set up to make things easier. To seed the local database, use the command `npm run seed` in your terminal.
+Now you need to seed those databases with data. To seed the local database, use the command `npm run seed` in your terminal.
 
 ```
 npm run seed
